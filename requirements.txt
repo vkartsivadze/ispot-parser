@@ -5,3 +5,4 @@ gspread
 beautifulsoup4
 camoufox
 playwright==1.49.0
+python-dotenv

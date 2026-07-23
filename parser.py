@@ -11,12 +11,15 @@ import cloudscraper
 import gspread
 from bs4 import BeautifulSoup
 from playwright.async_api import TimeoutError as PWTimeout
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # ==========================================
 # 1. GOOGLE SHEETS CONFIG
 # ==========================================
-SHEET_URL = "https://docs.google.com/spreadsheets/d/1X6eCSHhDB1VEJZ0dpRkk9ts4q9g4FiEX0RKJu6D1tkk/edit"
-CREDENTIALS_FILE = "credentials.json"
+SHEET_URL = os.environ["SHEET_URL"]
+CREDENTIALS_FILE = os.environ["CREDENTIALS_FILE"]
 
 def get_workbook():
     gc = gspread.service_account(filename=CREDENTIALS_FILE)
