@@ -89,17 +89,25 @@ async def _get_alta_price(browser, url):
             except PWTimeout:
                 await asyncio.sleep(3)
                 continue
-            # Wait up to 20s for CF challenge to resolve; abort if it doesn't
-            for _ in range(4):
+            # Give CF challenge JS time to start executing before we check
+            await asyncio.sleep(3)
+            # Wait up to 45s for CF challenge to resolve; abort if it doesn't
+            for _ in range(9):
                 await asyncio.sleep(5)
                 title = await page.title()
                 if not any(x in title.lower() for x in CF_CHALLENGE_STRINGS):
                     break
             else:
+                print(f"  alta CF Blocked — title was: {repr(title)} | url: {url}")
                 return "CF Blocked"
             if any(x in str(title) for x in ["502", "503"]):
                 await asyncio.sleep(3)
                 continue
+            # Wait for network to settle after CF redirect to actual page
+            try:
+                await page.wait_for_load_state("networkidle", timeout=10000)
+            except PWTimeout:
+                pass
             html = await page.content()
             soup = BeautifulSoup(html, "html.parser")
             for script in soup.find_all("script", type="application/ld+json"):
@@ -121,7 +129,7 @@ async def _get_alta_price(browser, url):
 
 async def _fetch_alta_async(urls):
     from camoufox.async_api import AsyncCamoufox
-    async with AsyncCamoufox(headless=True) as browser:
+    async with AsyncCamoufox(headless=True, os="windows", humanize=True) as browser:
         for url in urls:
             _ALTA_CACHE[url] = await _get_alta_price(browser, url)
             print(f"  alta: {_ALTA_CACHE[url]}")
