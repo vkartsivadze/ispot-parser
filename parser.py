@@ -53,7 +53,8 @@ COMPETITOR_CONFIG = {
     },
     "usmobi": {
         "method": "css",
-        "selector": "#pirveli2 h2",  # Category A price
+        "selector": ".cat-choice[data-letter='A']",  # Category A price
+        "attr": "data-price",
     },
     "alta": {
         "method": "camoufox",
@@ -188,7 +189,9 @@ def extract_price(url, competitor, variant_filter=None):
             el = soup.select_one(config["selector"])
             if not el:
                 return "OOS" if oos else "Element Not Found"
-            val = extract_number(el.get_text(strip=True))
+            attr = config.get("attr")
+            raw = el.get(attr, "") if attr else el.get_text(strip=True)
+            val = extract_number(raw)
             return fmt(val, oos) if val is not None else "Format Error"
 
         # --- JSON-LD ---
